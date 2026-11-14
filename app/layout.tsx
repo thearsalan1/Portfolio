@@ -1,15 +1,19 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Outfit, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import FirefliesBackground from "./components/FireFliesEffect";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+
+const outfit = Outfit({
+  variable: "--font-outfit",
   subsets: ["latin"],
+  weight: ["300","400","500","600","700","800","900"],
 });
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const jetbrains = JetBrains_Mono({
+  variable: "--font-jetbrains",
   subsets: ["latin"],
+  weight: ["400","500"],
 });
 
 export const metadata: Metadata = {
@@ -25,8 +29,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={` ${outfit.variable} ${jetbrains.variable} antialiased relative z-10`}
       >
+        <FirefliesBackground/>
         {children}
       </body>
     </html>
