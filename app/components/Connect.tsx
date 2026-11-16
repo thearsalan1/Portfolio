@@ -8,8 +8,7 @@ import {
   FaExternalLinkAlt,
 } from "react-icons/fa";
 
-const emailLink =
-  "https://mail.google.com/mail/?view=cm&fs=1&to=arsalanloq@gmail.com";
+const emailLink = "mailto:arsalanloq@gmail.com";
 
 const contactLinks = [
   {
@@ -33,7 +32,7 @@ const contactLinks = [
   {
     label: "WhatsApp",
     value: "+91 6307764094",
-    href: "https://wa.me/916307764094",
+    href: "https://api.whatsapp.com/send?phone=916307764094&text=Hi%20Arsalan!",
     icon: FaWhatsapp,
   },
 ];
@@ -42,11 +41,10 @@ export default function Connect() {
   return (
     <section
       id="contact"
-      className="w-full bg-transparent px-5 py-16 text-white sm:px-8 lg:py-20"
+      className="w-full bg-transparent px-5 py-15 text-white sm:px-8 lg:pt-10 pb-20"
     >
       <div className="mx-auto w-full max-w-7xl">
         <div className="grid items-center gap-10 border-t border-white/10 pt-12 md:grid-cols-[1.1fr_0.9fr] md:gap-16">
-          {/* Left Content */}
           <div>
             <p className="mb-3 text-xs font-medium uppercase tracking-[0.22em] text-indigo-400">
               Get In Touch
@@ -74,7 +72,6 @@ export default function Connect() {
             </a>
           </div>
 
-          {/* Contact Links */}
           <div className="w-full">
             <p className="mb-4 text-xs font-medium uppercase tracking-widest text-gray-500">
               Connect with me
@@ -88,8 +85,10 @@ export default function Connect() {
                   <a
                     key={item.label}
                     href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    target={item.label === "Email" ? undefined : "_blank"}
+                    rel={
+                      item.label === "Email" ? undefined : "noopener noreferrer"
+                    }
                     className="group flex items-center justify-between gap-4 py-5 transition"
                   >
                     <div className="flex min-w-0 items-center gap-4">
@@ -116,7 +115,6 @@ export default function Connect() {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="mt-12 flex flex-col justify-between gap-3 text-xs text-gray-500 sm:flex-row sm:items-center">
           <p>© {new Date().getFullYear()} Arsalan. All rights reserved.</p>
 

@@ -362,8 +362,8 @@ export default function MyProjects() {
                   </button>
                 </div>
 
-                {/* Preview (16:10) */}
-                <div className="relative aspect-[16/10] w-full bg-white">
+                {/* Preview  */}
+                <div className="project-preview relative aspect-[16/10] w-full bg-white">
                   {active.live ? (
                     <>
                       {loading && (
