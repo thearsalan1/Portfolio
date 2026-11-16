@@ -1,14 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  FaGithub,
-  FaStar,
-  FaCodeBranch,
-  FaExternalLinkAlt,
-  FaUsers,
-  FaBook,
-} from "react-icons/fa";
+import { FaGithub, FaExternalLinkAlt, FaUsers, FaBook } from "react-icons/fa";
 
 const USERNAME = "thearsalan1";
 
@@ -22,16 +15,20 @@ type User = {
   followers: number;
 };
 
-type Repo = {
-  id: number;
+type FeaturedRepo = {
+  id: string;
   name: string;
   description: string | null;
-  html_url: string;
-  stargazers_count: number;
-  forks_count: number;
+  url: string;
   language: string | null;
-  pushed_at: string;
-  fork: boolean;
+  color: string | null;
+};
+
+type GitHubData = {
+  user: User;
+  recent: FeaturedRepo[];
+  pinned: FeaturedRepo[];
+  languages: Record<string, number>;
 };
 
 const languageColors: Record<string, string> = {
@@ -40,47 +37,35 @@ const languageColors: Record<string, string> = {
   Python: "#3572A5",
   Java: "#b07219",
   CSS: "#663399",
+  SCSS: "#c6538c",
   HTML: "#e34c26",
   Go: "#00ADD8",
   PHP: "#4F5D95",
   C: "#555555",
   "C++": "#f34b7d",
   Shell: "#89e051",
+  Dockerfile: "#384d54",
+  Other: "#8b8b9a",
 };
 
 export default function GitHubActivity() {
-  const [user, setUser] = useState<User | null>(null);
-  const [repos, setRepos] = useState<Repo[]>([]);
+  const [data, setData] = useState<GitHubData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // All GitHub requests happen on the server (/api/github), using the token
   useEffect(() => {
-    const fetchGitHub = async () => {
+    const load = async () => {
       try {
-        const [userResponse, repoResponse] = await Promise.all([
-          fetch(`https://api.github.com/users/${USERNAME}`),
-          fetch(
-            `https://api.github.com/users/${USERNAME}/repos?per_page=100&sort=updated`,
-          ),
-        ]);
+        const response = await fetch("/api/github");
+        const json = await response.json();
 
-        if (!userResponse.ok || !repoResponse.ok) {
-          throw new Error("Unable to load GitHub profile.");
+        if (!response.ok) {
+          console.warn("GitHub route error:", json.error);
+          throw new Error(json.error);
         }
 
-        const userData: User = await userResponse.json();
-        const repoData: Repo[] = await repoResponse.json();
-
-        setUser(userData);
-
-        const originalRepos = repoData
-          .filter((repo) => !repo.fork)
-          .sort(
-            (a, b) =>
-              new Date(b.pushed_at).getTime() - new Date(a.pushed_at).getTime(),
-          );
-
-        setRepos(originalRepos.slice(0, 4));
+        setData(json as GitHubData);
       } catch {
         setError("GitHub data is currently unavailable.");
       } finally {
@@ -88,79 +73,60 @@ export default function GitHubActivity() {
       }
     };
 
-    fetchGitHub();
+    load();
   }, []);
 
-  const totalStars = repos.reduce(
-    (total, repo) => total + repo.stargazers_count,
-    0,
+  const user = data?.user ?? null;
+  const showingPinned = (data?.pinned.length ?? 0) > 0;
+  const featuredRepos: FeaturedRepo[] = data
+    ? showingPinned
+      ? data.pinned
+      : data.recent
+    : [];
+
+  // Top 6 languages + "Other"
+  const sortedLanguages = Object.entries(data?.languages ?? {}).sort(
+    (a, b) => b[1] - a[1],
   );
+  const topLanguages = sortedLanguages.slice(0, 6);
+  const otherTotal = sortedLanguages
+    .slice(6)
+    .reduce((total, [, value]) => total + value, 0);
 
-  const totalForks = repos.reduce((total, repo) => total + repo.forks_count, 0);
+  const languageList: [string, number][] =
+    otherTotal > 0 ? [...topLanguages, ["Other", otherTotal]] : topLanguages;
 
-  const languages = repos.reduce<Record<string, number>>((acc, repo) => {
-    if (repo.language) {
-      acc[repo.language] = (acc[repo.language] || 0) + 1;
-    }
-    return acc;
-  }, {});
-
-  const languageList = Object.entries(languages)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-
-  const totalLanguages = languageList.reduce(
-    (total, [, count]) => total + count,
+  const totalLanguageValue = languageList.reduce(
+    (total, [, value]) => total + value,
     0,
   );
 
   const stats = [
-    {
-      label: "Repositories",
-      value: user?.public_repos ?? 0,
-      icon: FaBook,
-    },
-    {
-      label: "Followers",
-      value: user?.followers ?? 0,
-      icon: FaUsers,
-    },
-    {
-      label: "Stars",
-      value: totalStars,
-      icon: FaStar,
-    },
-    {
-      label: "Forks",
-      value: totalForks,
-      icon: FaCodeBranch,
-    },
+    { label: "Repositories", value: user?.public_repos ?? 0, icon: FaBook },
+    { label: "Followers", value: user?.followers ?? 0, icon: FaUsers },
   ];
 
   return (
     <section
       id="github"
-      className="relative overflow-hidden bg-[#080b16] px-5 py-16 text-white sm:px-8"
+      className="relative w-full overflow-hidden bg-[#080b16] px-5 py-14 text-white sm:px-8 lg:px-10 lg:py-16"
     >
-      <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-indigo-600/10 blur-[100px]" />
-      <div className="pointer-events-none absolute -bottom-40 -left-32 h-80 w-80 rounded-full bg-blue-500/10 blur-[100px]" />
+      {/* Background */}
+      <div className="pointer-events-none absolute -right-40 top-10 h-80 w-80 rounded-full bg-indigo-600/[0.08] blur-[120px]" />
+      <div className="pointer-events-none absolute -bottom-40 -left-40 h-80 w-80 rounded-full bg-blue-500/[0.07] blur-[120px]" />
 
-      <div className="relative mx-auto w-full max-w-6xl">
-        <div className="mb-7 flex items-end justify-between gap-4">
-          <div>
-            <p className="mb-2 text-xs font-semibold uppercase tracking-[0.22em] text-indigo-400">
-              Open source
-            </p>
-            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-              GitHub <span className="text-indigo-400">Overview</span>
-            </h2>
-          </div>
+      <div className="relative mx-auto w-full max-w-[1600px]">
+        {/* Header */}
+        <div className="mb-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-[42px]">
+            GitHub <span className="text-indigo-400">Overview</span>
+          </h2>
 
           <a
             href={`https://github.com/${USERNAME}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-white/10 px-3.5 py-2 text-xs font-medium text-gray-300 transition hover:border-indigo-400/40 hover:text-white"
+            className="inline-flex w-fit items-center gap-2 rounded-lg border border-white/10 px-4 py-2.5 text-xs font-medium text-gray-300 transition hover:border-indigo-400/40 hover:text-white"
           >
             <FaGithub size={15} />
             <span>Profile</span>
@@ -169,80 +135,75 @@ export default function GitHubActivity() {
         </div>
 
         {loading ? (
-          <div className="rounded-2xl border border-white/[0.08] bg-[#101525] p-8 text-center text-sm text-gray-400">
+          <div className="rounded-xl border border-white/[0.08] bg-[#101525] p-8 text-center text-sm text-gray-400">
             Loading GitHub overview...
           </div>
         ) : error || !user ? (
-          <div className="rounded-2xl border border-white/[0.08] bg-[#101525] p-8 text-center text-sm text-gray-400">
+          <div className="rounded-xl border border-white/[0.08] bg-[#101525] p-8 text-center text-sm text-gray-400">
             {error || "Unable to load GitHub profile."}
           </div>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-white/[0.08] bg-[#101525]">
-            <div className="grid gap-6 p-5 md:grid-cols-[1fr_1fr] md:gap-8 md:p-7">
+          <div className="grid grid-cols-1 items-stretch gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.25fr)]">
+            {/* LEFT: profile + languages */}
+            <div className="flex min-w-0 flex-col gap-4">
               {/* Profile */}
-              <div className="flex items-center gap-4">
-                <img
-                  src={user.avatar_url}
-                  alt={`${user.login} avatar`}
-                  className="h-16 w-16 rounded-full border border-white/10 object-cover"
-                />
+              <div className="rounded-xl border border-white/[0.08] bg-[#101525] p-5 sm:p-6">
+                <div className="flex items-center gap-4">
+                  <img
+                    src={user.avatar_url}
+                    alt={`${user.login} avatar`}
+                    className="h-16 w-16 shrink-0 rounded-full border border-white/10 object-cover"
+                  />
 
-                <div className="min-w-0">
-                  <h3 className="truncate text-lg font-semibold text-white">
-                    {user.name || user.login}
-                  </h3>
-                  <p className="mt-0.5 text-sm text-indigo-400">
-                    @{user.login}
-                  </p>
-                  <p className="mt-1 line-clamp-2 text-xs text-gray-400">
-                    {user.bio || "Full Stack Developer"}
-                  </p>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-lg font-semibold text-white">
+                      {user.name || user.login}
+                    </h3>
+                    <p className="mt-0.5 text-sm text-indigo-400">
+                      @{user.login}
+                    </p>
+                    <p className="mt-1 line-clamp-2 text-xs text-gray-400">
+                      {user.bio || "Full Stack Developer"}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-5 flex items-center gap-8 border-t border-white/[0.08] pt-4">
+                  {stats.map((stat) => {
+                    const Icon = stat.icon;
+
+                    return (
+                      <div key={stat.label} className="flex items-center gap-3">
+                        <Icon className="text-sm text-indigo-400" />
+                        <div>
+                          <p className="text-xl font-bold leading-none text-white">
+                            {stat.value}
+                          </p>
+                          <p className="mt-1 text-xs text-gray-500">
+                            {stat.label}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
-              {/* Stats */}
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {stats.map((stat) => {
-                  const Icon = stat.icon;
-
-                  return (
-                    <div
-                      key={stat.label}
-                      className="rounded-xl border border-white/[0.06] bg-white/[0.025] px-3 py-3"
-                    >
-                      <Icon className="mb-2 text-sm text-indigo-400" />
-                      <p className="text-xl font-bold text-white">
-                        {stat.value}
-                      </p>
-                      <p className="mt-0.5 text-[11px] text-gray-500">
-                        {stat.label}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="grid border-t border-white/[0.07] md:grid-cols-2">
               {/* Languages */}
-              <div className="border-b border-white/[0.07] p-5 md:border-b-0 md:border-r md:p-6">
-                <div className="mb-4 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-gray-200">
-                    Top Languages
-                  </h3>
-                  <span className="text-[11px] text-gray-500">
-                    Repository distribution
-                  </span>
-                </div>
+              <div className="flex-1 rounded-xl border border-white/[0.08] bg-[#101525] p-5 sm:p-6">
+                <h3 className="mb-4 text-sm font-semibold text-gray-200">
+                  Top Languages
+                </h3>
 
                 {languageList.length > 0 ? (
                   <>
-                    <div className="flex h-2 overflow-hidden rounded-full bg-white/10">
-                      {languageList.map(([language, count]) => (
+                    <div className="flex h-2.5 overflow-hidden rounded-full bg-white/10">
+                      {languageList.map(([language, value]) => (
                         <div
                           key={language}
+                          title={language}
                           style={{
-                            width: `${(count / totalLanguages) * 100}%`,
+                            width: `${(value / totalLanguageValue) * 100}%`,
                             backgroundColor:
                               languageColors[language] || "#8b8b9a",
                           }}
@@ -250,23 +211,29 @@ export default function GitHubActivity() {
                       ))}
                     </div>
 
-                    <div className="mt-4 flex flex-wrap gap-x-4 gap-y-2">
-                      {languageList.map(([language]) => (
-                        <div
+                    <ul className="mt-5 space-y-2.5">
+                      {languageList.map(([language, value]) => (
+                        <li
                           key={language}
-                          className="flex items-center gap-1.5 text-xs text-gray-400"
+                          className="flex items-center justify-between gap-3 text-sm"
                         >
-                          <span
-                            className="h-2 w-2 rounded-full"
-                            style={{
-                              backgroundColor:
-                                languageColors[language] || "#8b8b9a",
-                            }}
-                          />
-                          {language}
-                        </div>
+                          <span className="flex items-center gap-2 text-gray-300">
+                            <span
+                              className="h-2.5 w-2.5 rounded-full"
+                              style={{
+                                backgroundColor:
+                                  languageColors[language] || "#8b8b9a",
+                              }}
+                            />
+                            {language}
+                          </span>
+
+                          <span className="text-xs text-gray-500">
+                            {((value / totalLanguageValue) * 100).toFixed(1)}%
+                          </span>
+                        </li>
                       ))}
-                    </div>
+                    </ul>
                   </>
                 ) : (
                   <p className="text-xs text-gray-500">
@@ -274,46 +241,63 @@ export default function GitHubActivity() {
                   </p>
                 )}
               </div>
+            </div>
 
-              {/* Recent repositories */}
-              <div className="p-5 md:p-6">
-                <div className="mb-3 flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-gray-200">
-                    Recent Repositories
-                  </h3>
+            {/* RIGHT: pinned repositories */}
+            <div className="flex min-w-0 flex-col rounded-xl border border-white/[0.08] bg-[#101525] p-5 sm:p-6">
+              <div className="mb-4 flex items-center justify-between">
+                <h3 className="text-sm font-semibold text-gray-200">
+                  {showingPinned
+                    ? "Pinned Repositories"
+                    : "Recent Repositories"}
+                </h3>
+                <a
+                  href={`https://github.com/${USERNAME}?tab=repositories`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs text-indigo-400 transition hover:text-indigo-300"
+                >
+                  View all
+                </a>
+              </div>
+
+              <div className="grid flex-1 auto-rows-fr grid-cols-1 gap-3 sm:grid-cols-2">
+                {featuredRepos.map((repo) => (
                   <a
-                    href={`https://github.com/${USERNAME}?tab=repositories`}
+                    key={repo.id}
+                    href={repo.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-[11px] text-indigo-400 transition hover:text-indigo-300"
+                    className="group flex min-w-0 flex-col rounded-lg border border-white/[0.06] bg-white/[0.025] p-4 transition-colors hover:border-indigo-400/30 hover:bg-white/[0.04]"
                   >
-                    View all
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="truncate text-sm font-medium text-gray-200 transition group-hover:text-indigo-400">
+                        {repo.name}
+                      </p>
+
+                      <FaExternalLinkAlt className="mt-1 shrink-0 text-[10px] text-gray-600 transition group-hover:text-indigo-400" />
+                    </div>
+
+                    <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-gray-500">
+                      {repo.description || "No description"}
+                    </p>
+
+                    {repo.language && (
+                      <p className="mt-auto flex items-center gap-1.5 pt-3 text-xs text-gray-400">
+                        <span
+                          className="h-2 w-2 rounded-full"
+                          style={{
+                            backgroundColor:
+                              repo.color ||
+                              languageColors[repo.language] ||
+                              "#8b8b9a",
+                          }}
+                        />
+                        {repo.language}
+                      </p>
+                    )}
                   </a>
-                </div>
-
-                <div className="divide-y divide-white/[0.06]">
-                  {repos.map((repo) => (
-                    <a
-                      key={repo.id}
-                      href={repo.html_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group flex items-center justify-between gap-3 py-2.5 first:pt-0 last:pb-0"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-gray-200 transition group-hover:text-indigo-400">
-                          {repo.name}
-                        </p>
-                        <p className="mt-1 truncate text-[11px] text-gray-500">
-                          {repo.language || "Code"}
-                          {repo.description ? ` · ${repo.description}` : ""}
-                        </p>
-                      </div>
-
-                      <FaExternalLinkAlt className="shrink-0 text-[10px] text-gray-600 transition group-hover:text-indigo-400" />
-                    </a>
-                  ))}
-                </div>
+                ))}
               </div>
             </div>
           </div>

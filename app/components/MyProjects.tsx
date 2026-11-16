@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from "react";
@@ -162,15 +161,8 @@ export default function MyProjects() {
 
       <div className="relative mx-auto w-full max-w-[1600px]">
         {/* Heading */}
-        <div className="mb-9 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+        <div className="mb-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
-            <div className="mb-3 flex items-center gap-3">
-              <span className="h-px w-8 bg-indigo-400" />
-              <span className="font-mono text-[11px] uppercase tracking-[0.22em] text-indigo-400">
-                Selected Work
-              </span>
-            </div>
-
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-[42px]">
               Things I've{" "}
               <span className="bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
@@ -196,20 +188,14 @@ export default function MyProjects() {
           </a>
         </div>
 
-        {/* Three-column project workspace */}
-        <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[190px_minmax(230px,0.75fr)_minmax(0,2fr)]">
-
-          {/* LEFT: Project tiles */}
-          <aside className="min-w-0">
-            <div className="mb-3 flex items-center justify-between xl:block">
-              <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-gray-500">
-                Projects
-              </p>
-              <p className="font-mono text-[10px] text-gray-600 xl:mt-1">
-                04 TOTAL
-              </p>
-            </div>
-
+        {/*
+          mobile: tiles, details, preview stacked
+          lg:     tiles on top, details + preview side by side
+          xl:     tiles | details | preview
+        */}
+        <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(280px,0.8fr)_minmax(0,1.6fr)] xl:grid-cols-[190px_minmax(230px,0.75fr)_minmax(0,2fr)]">
+          {/* Project tiles */}
+          <aside className="min-w-0 lg:col-span-2 xl:col-span-1">
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 xl:grid-cols-1">
               {projects.map((project, index) => {
                 const selected = activeIndex === index;
@@ -222,7 +208,7 @@ export default function MyProjects() {
                       setLoading(Boolean(project.live));
                     }}
                     aria-pressed={selected}
-                    className={`group relative min-h-[100px] rounded-xl border p-3.5 text-left transition-all duration-200 xl:min-h-[112px] xl:p-4 ${
+                    className={`relative rounded-xl border p-4 text-left transition-colors duration-200 ${
                       selected
                         ? "border-indigo-400/40 bg-gradient-to-br from-[#1b2340] to-[#11182b]"
                         : "border-white/[0.08] bg-[#0d1220] hover:border-white/20 hover:bg-[#121a2c]"
@@ -232,33 +218,15 @@ export default function MyProjects() {
                       <span className="absolute bottom-3 left-0 top-3 w-[2px] rounded-r bg-indigo-400" />
                     )}
 
-                    <div className="flex items-center justify-between">
-                      <span
-                        className={`font-mono text-[11px] ${
-                          selected ? "text-indigo-300" : "text-gray-600"
-                        }`}
-                      >
-                        / {project.number}
-                      </span>
-
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          project.live ? "bg-emerald-400" : "bg-amber-400"
-                        }`}
-                      />
-                    </div>
-
                     <h3
-                      className={`mt-3 text-sm font-semibold xl:text-base ${
-                        selected
-                          ? "text-white"
-                          : "text-gray-300 group-hover:text-white"
+                      className={`text-sm font-semibold xl:text-base ${
+                        selected ? "text-white" : "text-gray-300"
                       }`}
                     >
                       {project.title}
                     </h3>
 
-                    <p className="mt-1 line-clamp-2 text-[10px] leading-4 text-gray-500 xl:text-[11px]">
+                    <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-gray-500">
                       {project.subtitle}
                     </p>
                   </button>
@@ -267,44 +235,40 @@ export default function MyProjects() {
             </div>
           </aside>
 
-          {/* MIDDLE: Selected project details */}
-          <div className="min-w-0 xl:pt-7">
-            <div className="flex items-center gap-2">
-              <span className="h-px w-5 bg-indigo-400" />
-              <span className="font-mono text-[10px] uppercase tracking-[0.17em] text-indigo-400">
-                {active.subtitle}
+          {/* Selected project details */}
+          <div className="min-w-0">
+            <div className="flex flex-wrap items-center gap-3">
+              <h3 className="text-2xl font-bold tracking-tight text-white sm:text-3xl xl:text-[28px]">
+                {active.title}
+              </h3>
+
+              <span
+                className={`flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] ${
+                  active.live
+                    ? "bg-emerald-400/10 text-emerald-300"
+                    : "bg-amber-400/10 text-amber-300"
+                }`}
+              >
+                <FaCircle className="text-[5px]" />
+                {active.status}
               </span>
             </div>
 
-            <h3 className="mt-3 text-2xl font-bold tracking-tight text-white sm:text-3xl xl:text-[28px]">
-              {active.title}
-            </h3>
+            <p className="mt-1 text-sm text-indigo-300">{active.subtitle}</p>
 
-            <p className="mt-3 text-sm leading-6 text-gray-400">
+            <p className="mt-4 max-w-2xl text-sm leading-6 text-gray-400">
               {active.description}
             </p>
 
-            {/* Status */}
-            <div className="mt-4 flex items-center gap-2">
-              <FaCircle
-                className={`text-[7px] ${
-                  active.live ? "text-emerald-400" : "text-amber-400"
-                }`}
-              />
-              <span className="text-xs text-gray-400">{active.status}</span>
-            </div>
-
             {/* Technologies */}
-            <div className="mt-7">
-              <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.17em] text-gray-500">
-                Technologies
-              </p>
+            <div className="mt-8">
+              <p className="mb-3 text-xs text-gray-500">Built with</p>
 
               <div className="flex flex-wrap gap-2">
                 {active.tech.map((technology) => (
                   <span
                     key={technology}
-                    className="rounded-md border border-white/[0.08] bg-white/[0.035] px-2.5 py-1.5 text-[11px] text-gray-300"
+                    className="rounded-md bg-white/[0.05] px-2.5 py-1 text-xs text-gray-300"
                   >
                     {technology}
                   </span>
@@ -313,32 +277,30 @@ export default function MyProjects() {
             </div>
 
             {/* Highlights */}
-            <div className="mt-7">
-              <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.17em] text-gray-500">
-                Highlights
-              </p>
+            <div className="mt-8">
+              <p className="mb-3 text-xs text-gray-500">Highlights</p>
 
-              <div className="space-y-2.5">
+              <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-1">
                 {active.features.map((feature) => (
-                  <div
+                  <li
                     key={feature}
-                    className="flex items-start gap-2 text-xs leading-5 text-gray-300"
+                    className="flex items-start gap-2.5 text-sm leading-5 text-gray-300"
                   >
-                    <span className="mt-0.5 text-indigo-400">✦</span>
-                    <span>{feature}</span>
-                  </div>
+                    <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-indigo-400" />
+                    {feature}
+                  </li>
                 ))}
-              </div>
+              </ul>
             </div>
 
             {/* Project links */}
-            <div className="mt-7 flex flex-wrap gap-2">
+            <div className="mt-8 flex flex-wrap gap-2">
               {active.live && (
                 <a
                   href={active.live}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-3.5 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-600"
+                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-500 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-indigo-600"
                 >
                   Live Website
                   <FaExternalLinkAlt className="text-[9px]" />
@@ -350,7 +312,7 @@ export default function MyProjects() {
                   href={active.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-3.5 py-2.5 text-xs text-gray-300 transition hover:border-indigo-400/40 hover:text-white"
+                  className="inline-flex items-center gap-2 rounded-lg border border-white/10 px-4 py-2.5 text-xs text-gray-300 transition hover:border-indigo-400/40 hover:text-white"
                 >
                   <FaGithub />
                   Source Code
@@ -359,31 +321,15 @@ export default function MyProjects() {
             </div>
           </div>
 
-          {/* RIGHT: Live preview */}
-          <div className="min-w-0">
-            <div className="mb-3 flex items-center justify-between">
-              <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-gray-500">
-                Live Preview
-              </span>
-
-              <span className="font-mono text-[10px] text-gray-600">
-                {active.number} / 04
-              </span>
-            </div>
-
-            <div className="mx-auto w-full max-w-[850px]">
+          {/* Live preview */}
+          <div className="min-w-0 lg:sticky lg:top-6">
+            <div className="mx-auto w-full max-w-[920px]">
               <div
                 id="project-browser"
                 className="overflow-hidden rounded-xl border border-white/[0.1] bg-[#0e1423] shadow-[0_18px_55px_rgba(0,0,0,0.3)]"
               >
                 {/* Browser toolbar */}
                 <div className="flex items-center gap-3 border-b border-white/[0.08] bg-[#141b2c] px-3.5 py-2.5 sm:px-4">
-                  <div className="flex shrink-0 items-center gap-1.5">
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-[#28c840]" />
-                  </div>
-
                   <div className="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-white/[0.06] bg-[#090e19] px-3 py-1.5">
                     <FaGlobe className="shrink-0 text-[10px] text-gray-500" />
 
@@ -416,7 +362,7 @@ export default function MyProjects() {
                   </button>
                 </div>
 
-                {/* Keep original 16:10 preview ratio */}
+                {/* Preview (16:10) */}
                 <div className="relative aspect-[16/10] w-full bg-white">
                   {active.live ? (
                     <>
@@ -476,52 +422,9 @@ export default function MyProjects() {
                     </div>
                   )}
                 </div>
-
-                {/* Browser bottom bar */}
-                <div className="flex items-center justify-between gap-3 border-t border-white/[0.08] bg-[#141b2c] px-3.5 py-2.5 sm:px-4">
-                  <div className="flex min-w-0 items-center gap-2 text-[11px] text-gray-500">
-                    <FaCircle
-                      className={`shrink-0 text-[6px] ${
-                        active.live ? "text-emerald-400" : "text-amber-400"
-                      }`}
-                    />
-                    <span>{active.status}</span>
-                    <span className="text-gray-700">/</span>
-                    <span className="truncate">{active.title}</span>
-                  </div>
-
-                  {active.live && (
-                    <a
-                      href={active.live}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex shrink-0 items-center gap-2 text-[11px] font-medium text-indigo-300 transition hover:text-white"
-                    >
-                      Open website
-                      <FaExternalLinkAlt className="text-[9px]" />
-                    </a>
-                  )}
-                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-10 flex flex-col justify-between gap-3 border-t border-white/[0.08] pt-5 sm:flex-row sm:items-center">
-          <p className="text-xs text-gray-500">
-            Practical engineering, real-world problems, continuous learning.
-          </p>
-
-          <a
-            href="https://github.com/thearsalan1"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex w-fit items-center gap-2 text-xs text-indigo-400 transition hover:text-white"
-          >
-            More on GitHub
-            <FaArrowRight />
-          </a>
         </div>
       </div>
     </section>

@@ -128,7 +128,7 @@ const MySkills = () => {
   return (
     <section
       id="skills"
-      className="relative isolate w-full overflow-hidden bg-[#080b16] px-6 py-20 text-white sm:px-10 lg:px-16"
+      className="relative isolate w-full overflow-hidden bg-[#080b16] px-6 py-10 text-white sm:px-10 lg:px-16"
     >
       {/* Main background gradient */}
       <div className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_15%_15%,rgba(79,70,229,0.16),transparent_38%),radial-gradient(ellipse_at_90%_75%,rgba(147,51,234,0.12),transparent_35%),linear-gradient(135deg,#080b16_0%,#0c1020_50%,#090b18_100%)]" />

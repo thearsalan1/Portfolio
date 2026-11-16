@@ -1,6 +1,4 @@
 import {
-  BsBuilding,
-  BsCalendar3,
   BsArrowUpRight,
   BsDatabase,
   BsGlobe,
@@ -8,178 +6,172 @@ import {
   BsWallet2,
 } from "react-icons/bs";
 
-const projects = [
+import type { ReactNode } from "react";
+
+// Interfaces
+interface Project {
+  name: string;
+  type: "Backend" | "Frontend" | "Full stack";
+  icon: ReactNode;
+  description: string;
+  technologies: string[];
+  href?: string;
+}
+
+interface ProjectCardProps {
+  project: Project;
+}
+
+// Projects
+const projects: Project[] = [
   {
     name: "OEMS",
-    type: "Backend Development",
+    type: "Backend",
     icon: <BsDatabase />,
     description:
-      "Developed backend services for an online examination platform, including APIs, authentication, database architecture and result processing.",
+      "Backend services for an online examination platform: APIs, authentication, database architecture and result processing.",
     technologies: ["Node.js", "Express.js", "Prisma", "PostgreSQL", "JWT"],
   },
   {
     name: "Main Company Website",
-    type: "Frontend Development",
+    type: "Frontend",
     icon: <BsGlobe />,
     description:
-      "Developed responsive website interfaces by translating UI/UX designs into reusable React components.",
+      "Responsive website interfaces, built by turning UI/UX designs into reusable React components.",
     technologies: ["React.js", "JavaScript", "CSS", "Tailwind CSS"],
   },
   {
     name: "GitHub Analyser",
-    type: "Full Stack Development",
+    type: "Full stack",
     icon: <BsGithub />,
     description:
-      "Built a GitHub profile analysis platform with repository insights and a customizable README generator.",
+      "A GitHub profile analysis platform with repository insights and a customizable README generator.",
     technologies: ["Next.js", "TypeScript", "MySQL", "Tailwind CSS"],
   },
   {
     name: "QuickMoney",
-    type: "Frontend Development",
+    type: "Frontend",
     icon: <BsWallet2 />,
     description:
-      "Developed a financial application interface focused on usability and a clean user experience.",
+      "A financial application interface focused on usability and a clean user experience.",
     technologies: ["Next.js", "React", "TypeScript", "Tailwind CSS"],
   },
 ];
 
-function ProjectItem({ project, index }) {
-  return (
-    <article className="group grid grid-cols-1 gap-4 border-t border-white/10 py-6 sm:grid-cols-[40px_minmax(180px,0.8fr)_minmax(260px,1.5fr)_minmax(180px,1fr)] sm:gap-6 lg:gap-10">
-      <span className="pt-1 font-mono text-xs text-indigo-400">
-        0{index + 1}
-      </span>
+// Project Card
+function ProjectCard({ project }: ProjectCardProps) {
+  const Wrapper = project.href ? "a" : "div";
 
-      <div>
-        <div className="mb-2 flex items-center gap-2 text-indigo-400">
-          <span>{project.icon}</span>
-          <span className="text-xs text-gray-500">{project.type}</span>
+  const props = project.href
+    ? {
+        href: project.href,
+        target: "_blank",
+        rel: "noreferrer",
+      }
+    : {};
+
+  return (
+    <Wrapper
+      {...props}
+      className="group flex min-w-0 flex-col rounded-xl border border-white/10 bg-white/[0.03] p-5 transition-colors hover:border-indigo-400/40 hover:bg-white/[0.05]"
+    >
+      <div className="flex items-center gap-3">
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-400/10 text-indigo-300">
+          {project.icon}
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <h4 className="truncate text-base font-semibold text-white">
+            {project.name}
+          </h4>
+          <p className="text-xs text-gray-500">{project.type}</p>
         </div>
 
-        <h3 className="text-base font-semibold text-white transition-colors group-hover:text-indigo-300">
-          {project.name}
-        </h3>
+        {project.href && (
+          <BsArrowUpRight className="shrink-0 text-gray-500 transition group-hover:text-white" />
+        )}
       </div>
 
-      <p className="text-sm leading-7 text-gray-400">{project.description}</p>
+      <p className="mt-4 break-words text-sm leading-6 text-gray-400">
+        {project.description}
+      </p>
 
-      <div className="flex flex-wrap content-start gap-2">
+      <ul className="mt-4 flex flex-wrap gap-1.5">
         {project.technologies.map((tech) => (
-          <span
+          <li
             key={tech}
-            className="border border-white/10 px-2 py-1 text-[11px] text-gray-400"
+            className="rounded-md bg-white/5 px-2 py-1 text-xs text-gray-300"
           >
             {tech}
-          </span>
+          </li>
         ))}
-      </div>
-    </article>
+      </ul>
+    </Wrapper>
   );
 }
 
+// Experience Component
 export default function Experience() {
   return (
-    <main
+    <section
       id="experience"
-      className="relative left-1/2 w-screen -translate-x-1/2 overflow-hidden bg-[#080b16] text-white"
+      className="relative w-full bg-[#080b16] text-white [box-shadow:0_0_0_100vmax_#080b16] [clip-path:inset(0_-100vmax)]"
     >
       <div className="pointer-events-none absolute -top-40 right-0 h-80 w-80 rounded-full bg-indigo-600/[0.07] blur-[120px]" />
 
-      <div className="relative mx-auto w-full px-6 py-16 sm:px-10 lg:px-16 xl:px-24">
-        {/* Heading */}
-        <header className="mb-14">
-          <p className="mb-4 flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-400">
-            <span className="h-px w-7 bg-indigo-400" />
-            Career
-          </p>
+      <div className="relative mx-auto w-full max-w-[1400px] px-5 py-16 sm:px-10 lg:px-16">
+        <header className="mb-12">
+          <h2 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+            Experience
+          </h2>
 
-          <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-            Experience<span className="text-indigo-400">.</span>
-          </h1>
-
-          <p className="mt-4 max-w-xl text-sm leading-7 text-gray-400">
-            My professional journey, development experience and selected work.
+          <p className="mt-3 max-w-lg text-sm leading-6 text-gray-400">
+            Where I work and what I've built there.
           </p>
         </header>
 
-        {/* Company details */}
-        <section className="border-y border-white/10 py-8">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-[1fr_auto] md:items-start">
-            <div>
-              <div className="mb-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center border border-indigo-400/20 bg-indigo-400/[0.07] text-lg text-indigo-300">
-                  <BsBuilding />
-                </div>
+        <ol className="relative ml-2 border-l border-white/15 sm:ml-3">
+          <li className="relative pb-2 pl-6 sm:pl-10">
+            <span className="absolute -left-[7px] top-1.5 flex h-3.5 w-3.5">
+              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-60 motion-safe:animate-ping" />
 
-                <span className="text-xs font-medium uppercase tracking-wider text-gray-500">
-                  Professional Experience
-                </span>
-              </div>
+              <span className="relative inline-flex h-3.5 w-3.5 rounded-full bg-emerald-400 ring-4 ring-[#080b16]" />
+            </span>
 
-              <h2 className="text-2xl font-semibold tracking-tight text-white">
-                MAT Nite Pvt. Ltd.
-              </h2>
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-gray-400">
+              <span>April 2026 – Present</span>
 
-              <p className="mt-2 text-sm font-medium text-indigo-300">
-                Full Stack Engineer
-              </p>
-
-              <p className="mt-4 max-w-2xl text-sm leading-7 text-gray-400">
-                Working on web applications and software products, contributing
-                to backend development, frontend implementation and building
-                practical solutions.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap gap-4 text-xs text-gray-400 md:flex-col md:items-end">
-              <span className="flex items-center gap-2">
-                <BsCalendar3 className="text-indigo-400" />
-                April 2026 – Present
+              <span className="rounded-full bg-emerald-400/10 px-2.5 py-0.5 text-xs font-medium text-emerald-300">
+                Current
               </span>
-
-              <span className="text-green-400">● Currently Working</span>
-            </div>
-          </div>
-        </section>
-
-        {/* Selected work */}
-        <section className="mt-14">
-          <div className="mb-6 flex items-end justify-between gap-4">
-            <div>
-              <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-indigo-400">
-                Portfolio Highlights
-              </p>
-
-              <h2 className="text-2xl font-semibold text-white">
-                Selected Work
-              </h2>
             </div>
 
-            <span className="text-xs text-gray-500">04 Projects</span>
-          </div>
+            <h3 className="mt-2 text-2xl font-semibold tracking-tight">
+              Full Stack Engineer
+            </h3>
 
-          {projects.map((project, index) => (
-            <ProjectItem key={project.name} project={project} index={index} />
-          ))}
+            <p className="mt-1 text-base text-indigo-300">
+              MAT Nite Pvt. Ltd.
+            </p>
 
-          <div className="border-t border-white/10" />
-        </section>
+            <p className="mt-4 max-w-3xl text-sm leading-7 text-gray-400">
+              Building web applications and software products across backend
+              development and frontend implementation, with a focus on
+              practical solutions that ship.
+            </p>
 
-        {/* Footer */}
-        <footer className="mt-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-          <p className="text-xs text-gray-500">
-            Building, learning and growing through development.
-          </p>
+            <h4 className="mb-4 mt-10 text-sm font-medium text-gray-300">
+              Selected work
+            </h4>
 
-          <a
-            href="#projects"
-            className="inline-flex items-center gap-2 text-xs text-indigo-300 transition-colors hover:text-white"
-          >
-            Explore all projects
-            <BsArrowUpRight />
-          </a>
-        </footer>
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
+              {projects.map((project) => (
+                <ProjectCard key={project.name} project={project} />
+              ))}
+            </div>
+          </li>
+        </ol>
       </div>
-    </main>
+    </section>
   );
 }
