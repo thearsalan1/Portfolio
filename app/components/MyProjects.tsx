@@ -132,21 +132,31 @@ export default function MyProjects() {
 
   const active = projects[activeIndex];
 
+  const selectProject = (index: number) => {
+    setActiveIndex(index);
+    setLoading(Boolean(projects[index].live));
+  };
+
   const refreshPreview = () => {
     if (!active.live) return;
+
     setLoading(true);
     setRefreshKey((prev) => prev + 1);
   };
 
-  const toggleFullscreen = () => {
+  const toggleFullscreen = async () => {
     const element = document.getElementById("project-browser");
 
     if (!element) return;
 
-    if (!document.fullscreenElement) {
-      element.requestFullscreen?.();
-    } else {
-      document.exitFullscreen?.();
+    try {
+      if (!document.fullscreenElement) {
+        await element.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    } catch {
+      element.scrollIntoView({ behavior: "smooth", block: "center" });
     }
   };
 
@@ -155,12 +165,11 @@ export default function MyProjects() {
       id="projects"
       className="relative w-full overflow-hidden bg-[#080b16] px-5 py-14 text-white sm:px-8 lg:px-10 lg:py-16"
     >
-      {/* Background */}
       <div className="pointer-events-none absolute -left-40 top-10 h-80 w-80 rounded-full bg-indigo-600/[0.08] blur-[120px]" />
+
       <div className="pointer-events-none absolute -right-40 bottom-10 h-80 w-80 rounded-full bg-purple-600/[0.07] blur-[120px]" />
 
       <div className="relative mx-auto w-full max-w-[1600px]">
-        {/* Heading */}
         <div className="mb-10 flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
           <div>
             <h2 className="text-3xl font-bold tracking-tight sm:text-4xl lg:text-[42px]">
@@ -188,13 +197,7 @@ export default function MyProjects() {
           </a>
         </div>
 
-        {/*
-          mobile: tiles, details, preview stacked
-          lg:     tiles on top, details + preview side by side
-          xl:     tiles | details | preview
-        */}
         <div className="grid grid-cols-1 items-start gap-8 lg:grid-cols-[minmax(280px,0.8fr)_minmax(0,1.6fr)] xl:grid-cols-[190px_minmax(230px,0.75fr)_minmax(0,2fr)]">
-          {/* Project tiles */}
           <aside className="min-w-0 lg:col-span-2 xl:col-span-1">
             <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4 xl:grid-cols-1">
               {projects.map((project, index) => {
@@ -203,10 +206,8 @@ export default function MyProjects() {
                 return (
                   <button
                     key={project.id}
-                    onClick={() => {
-                      setActiveIndex(index);
-                      setLoading(Boolean(project.live));
-                    }}
+                    type="button"
+                    onClick={() => selectProject(index)}
                     aria-pressed={selected}
                     className={`relative rounded-xl border p-4 text-left transition-colors duration-200 ${
                       selected
@@ -235,7 +236,6 @@ export default function MyProjects() {
             </div>
           </aside>
 
-          {/* Selected project details */}
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-3">
               <h3 className="text-2xl font-bold tracking-tight text-white sm:text-3xl xl:text-[28px]">
@@ -254,13 +254,14 @@ export default function MyProjects() {
               </span>
             </div>
 
-            <p className="mt-1 text-sm text-indigo-300">{active.subtitle}</p>
+            <p className="mt-1 text-sm text-indigo-300">
+              {active.subtitle}
+            </p>
 
             <p className="mt-4 max-w-2xl text-sm leading-6 text-gray-400">
               {active.description}
             </p>
 
-            {/* Technologies */}
             <div className="mt-8">
               <p className="mb-3 text-xs text-gray-500">Built with</p>
 
@@ -276,7 +277,6 @@ export default function MyProjects() {
               </div>
             </div>
 
-            {/* Highlights */}
             <div className="mt-8">
               <p className="mb-3 text-xs text-gray-500">Highlights</p>
 
@@ -293,7 +293,6 @@ export default function MyProjects() {
               </ul>
             </div>
 
-            {/* Project links */}
             <div className="mt-8 flex flex-wrap gap-2">
               {active.live && (
                 <a
@@ -321,14 +320,12 @@ export default function MyProjects() {
             </div>
           </div>
 
-          {/* Live preview */}
           <div className="min-w-0 lg:sticky lg:top-6">
             <div className="mx-auto w-full max-w-[920px]">
               <div
                 id="project-browser"
                 className="overflow-hidden rounded-xl border border-white/[0.1] bg-[#0e1423] shadow-[0_18px_55px_rgba(0,0,0,0.3)]"
               >
-                {/* Browser toolbar */}
                 <div className="flex items-center gap-3 border-b border-white/[0.08] bg-[#141b2c] px-3.5 py-2.5 sm:px-4">
                   <div className="flex min-w-0 flex-1 items-center gap-2 rounded-md border border-white/[0.06] bg-[#090e19] px-3 py-1.5">
                     <FaGlobe className="shrink-0 text-[10px] text-gray-500" />
@@ -362,7 +359,6 @@ export default function MyProjects() {
                   </button>
                 </div>
 
-                {/* Preview  */}
                 <div className="project-preview relative aspect-[16/10] w-full bg-white">
                   {active.live ? (
                     <>
@@ -380,7 +376,7 @@ export default function MyProjects() {
                         key={`${active.id}-${refreshKey}`}
                         src={active.live}
                         title={`${active.title} preview`}
-                        loading="lazy"
+                        loading="eager"
                         onLoad={() => setLoading(false)}
                         onError={() => setLoading(false)}
                         referrerPolicy="strict-origin-when-cross-origin"
