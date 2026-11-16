@@ -46,9 +46,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={` ${outfit.variable} ${jetbrains.variable} antialiased relative z-10`}
-      >
+      <body className={`antialiased relative z-10`}>
         <FirefliesBackground />
         {children}
       </body>
